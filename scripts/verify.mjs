@@ -166,8 +166,40 @@ async function testC2(ctx) {
   const sum = actives.reduce((a, b) => a + b, 0);
   const avg = sum / actives.length;
   const claimed = 46_000_000;
-  // MAU (unique accounts in 30d) can never exceed the SUM of daily uniques.
-  const verdict = sum >= claimed ? "Survives" : sum >= claimed * 0.5 ? "Inflated" : "False";
+
+  // Second window: May 2025, the month the claim's own source describes.
+  // Fetched from the same charts series in a separate call, best-effort:
+  // a failed or incomplete historical fetch degrades to the trailing
+  // window alone (and says so in the output) instead of failing the test.
+  let may = null;
+  let mayError = null;
+  try {
+    const hist = await getJSON(`${NEARBLOCKS}/charts`).then((d) => d.charts);
+    const mayDays = hist.filter((d) => {
+      const day = String(d.date).slice(0, 10);
+      return day >= "2025-05-01" && day <= "2025-05-31";
+    });
+    if (mayDays.length !== 31)
+      throw new Error(`May-2025 series incomplete: ${mayDays.length}/31 days served`);
+    const mayActives = mayDays.map((d) => Number(d.active_accounts));
+    const mayMax = Math.max(...mayActives);
+    may = {
+      days: mayDays.length,
+      sum: mayActives.reduce((a, b) => a + b, 0),
+      max: mayMax,
+      maxDate: String(mayDays[mayActives.indexOf(mayMax)].date).slice(0, 10),
+    };
+    may.avg = may.sum / may.days;
+  } catch (err) {
+    mayError = err.message;
+  }
+
+  // MAU (unique accounts in a month) can never exceed the SUM of that
+  // month's daily uniques. The claim gets the benefit of both windows:
+  // the verdict thresholds run against the LARGEST ceiling, so it is
+  // False only when even its own window's ceiling is below the claim.
+  const bestCeiling = may ? Math.max(sum, may.sum) : sum;
+  const verdict = bestCeiling >= claimed ? "Survives" : bestCeiling >= claimed * 0.5 ? "Inflated" : "False";
   return {
     numbers: {
       claimedMonthlyActiveUsers: claimed,
@@ -179,15 +211,36 @@ async function testC2(ctx) {
       impliedDailyActivesNeeded: Math.round(claimed / 30),
       latestDayActiveAccounts: actives.at(-1),
       latestDayTxns: Number(days.at(-1).txns),
+      ...(may
+        ? {
+            may2025DaysServed: may.days,
+            may2025AvgDailyActiveAccounts: Math.round(may.avg),
+            may2025MaxDailyActiveAccounts: may.max,
+            may2025MaxDay: may.maxDate,
+            may2025SumDailyActiveAccounts: may.sum,
+            may2025MauUpperBound: may.sum,
+            may2025ClaimToCeilingRatio: Number((claimed / may.sum).toFixed(2)),
+            largestCeilingAcrossBothWindows: bestCeiling,
+          }
+        : {
+            may2025HistoricalCheck: `Unavailable this run (${mayError}) — verdict rests on the trailing-30d window alone.`,
+          }),
     },
     figures: [
       { label: "Claimed MAU", display: "46,000,000" },
       { label: "Avg daily active accounts (30d)", display: num(avg) },
       { label: "Hard upper bound on MAU (Σ daily)", display: num(sum) },
+      ...(may
+        ? [{ label: "May 2025 ceiling, claim's own window (Σ daily)", display: num(may.sum) }]
+        : []),
     ],
     verdict,
     justification:
-      `Even the loosest possible bound kills this claim: summing every daily active-account count for the last 30 days (double-counting anyone active on two days) gives ${num(sum)} — a true unique MAU is smaller still. The claim needs ~${num(claimed / 30)} unique users per day; the chain shows ~${num(avg)}. Off by more than ${Math.floor(claimed / sum)}× against its own ceiling. (The 46M figure traces to May-2025 ecosystem marketing that counted cumulative/meta-transaction metrics as "users"; on-chain actives never came close.)`,
+      `Even the loosest possible bound kills this claim: summing every daily active-account count for the last 30 days (double-counting anyone active on two days) gives ${num(sum)} — a true unique MAU is smaller still. The claim needs ~${num(claimed / 30)} unique users per day; the chain shows ~${num(avg)}. Off by more than ${Math.floor(claimed / sum)}× against its own ceiling.` +
+      (may
+        ? ` And it fails in its own window too: the figure comes from May-2025 data, when the chain was ~${Math.round(may.avg / avg)}× busier — daily actives averaged ${num(may.avg)} and peaked at ${num(may.max)} on ${may.maxDate} — yet the same double-counting sum over all 31 days of May 2025 is ${num(may.sum)}, still ${(claimed / may.sum).toFixed(2)}× short of 46M. The claim was arithmetically impossible in the month it describes, not just today.`
+        : ` (The historical re-check of the claim's own window, May 2025, could not be completed this run — ${mayError} — so this verdict rests on the trailing window alone.)`) +
+      ` (The 46M figure traces to May-2025 ecosystem marketing that counted cumulative/meta-transaction metrics as "users"; on-chain actives never came close.)`,
     sourcesUsed: [`${NEARBLOCKS}/charts`],
   };
 }
@@ -464,7 +517,7 @@ const CLAIM_META = [
     claim: "NEAR has 46 million monthly active users",
     claimant: "Ecosystem analysis (Paragraph, on May-2025 data)",
     sourceUrl: "https://paragraph.com/@nhuttam1997/analyzing-near-blockchain-from-competing-head-to-head-with-solana-to-strategic-repositioning-part-1",
-    test: "Bound the true MAU from above: sum NearBlocks' daily active-account counts over the trailing 30 days. A unique monthly count can never exceed that sum — if the sum is below 46M, the claim is arithmetically impossible.",
+    test: "Bound the true MAU from above in two windows: sum NearBlocks' daily active-account counts over the trailing 30 days, and over May 2025 — the month the claim's own source describes. A unique monthly count can never exceed either sum — if even the claim's own window falls below 46M, the claim is arithmetically impossible.",
   },
   {
     id: "C3",

@@ -67,7 +67,7 @@ no API keys, no accounts, nothing to install.**
 
 ## Latest results
 
-Run of **2026-11-10T02:31Z** (NEAR mainnet block height 223,853,497).
+Run of **2026-11-10T02:59Z** (NEAR mainnet block height 223,856,364).
 Re-running `npm run verify` refreshes every figure; verdicts can move as
 the chain does.
 
@@ -76,12 +76,12 @@ the chain does.
 | # | Claim (claimant) | Verdict | What the data says |
 |---|---|---|---|
 | C1 | Intents crossed $37B+ all-time volume, 37M+ swaps (NEAR Protocol recap, 2026-11-03) | **Survives** | DefiLlama cumulative volume $37.006B = 100.0% of the claim. |
-| C2 | NEAR has 46M monthly active users (ecosystem analysis, on May-2025 data) | **False** | Trailing-30d daily active accounts average 58,223. Even summing all 30 daily counts — double-counting everyone, a hard ceiling on unique MAU — gives 1,746,682. The claim needs ~1.53M unique users *per day*; it is arithmetically impossible, off >26× against its own ceiling. |
+| C2 | NEAR has 46M monthly active users (ecosystem analysis, on May-2025 data) | **False** | Trailing-30d daily active accounts average 58,223. Even summing all 30 daily counts — double-counting everyone, a hard ceiling on unique MAU — gives 1,746,682. It also fails in its own window: over May 2025 the chain was ~7× busier (418,719/day average, peak 498,143), yet the same 31-day sum is 12,980,291 — still 3.54× short of 46M. The claim needs ~1.53M unique users *per day*; it is arithmetically impossible in both windows. |
 | C3 | NEAR reached 1M TPS (Q4 2025 benchmark, relayed by Nansen) | **Inflated** | The benchmark ran on 70 shards with pre-generated load. Production mainnet has 10 shards and averaged 10.4 TPS over the latest full day (895,302 txns) — about five orders of magnitude below the headline. A lab result marketed as network capability. |
-| C4 | NEAR TVL ≈ $244M (DataWallet, data as of 2026-09-22) | **Inflated** | DefiLlama read $197.2M on the claim's own date (−19% vs the headline) and $170.3M at run time. The level was genuinely reached later (peak $276.8M, 2026-10-12) and has since retraced −38.5%. |
+| C4 | NEAR TVL ≈ $244M (DataWallet, data as of 2026-09-22) | **Inflated** | DefiLlama read $197.2M on the claim's own date (−19% vs the headline) and $171.1M at run time. The level was genuinely reached later (peak $276.8M, 2026-10-12) and has since retraced −38.2%. |
 | C5 | Confidential Intents holds $150M+ confidential TVL, $3B+ confidential volume (NEAR, 2026-10-13) | **Unverifiable** | *All* Intents TVL, public + confidential, all chains, totals $191.1M — the claim needs 79% of that to be confidential alone. No public source splits the two: DefiLlama reports only the combined total, the Intents explorer defers to key-gated Dune dashboards, and the flows are confidential by design. The missing data is named, not papered over. |
 | C6 | Intents generated $52M+ cumulative fees, $8M+ to buybacks (Nansen Q3 2026) | **Survives** | DefiLlama cumulative fees $59.71M = 114.8% of the claim — the headline is conservative. (The $8M buyback leg has no independent public accounting; flagged on the card, not counted against the verdict.) |
-| C7 | Mainnet runs 10 shards, 600ms blocks, 100% uptime (NEAR anniversary update, 2026-10-13) | **Survives** | Average block time 0.577s; a live block carries exactly 10 chunks = 10 shards; uptime sampled over 8 consecutive 200k-block segments (~10.7 days) with the worst segment at 0.59 s/block vs a 3 s/block stall threshold — no room for a multi-minute stall in the window. |
+| C7 | Mainnet runs 10 shards, 600ms blocks, 100% uptime (NEAR anniversary update, 2026-10-13) | **Survives** | Average block time 0.594s; a live block carries exactly 10 chunks = 10 shards; uptime sampled over 8 consecutive 200k-block segments (~10.7 days) with the worst segment at 0.59 s/block vs a 3 s/block stall threshold — no room for a multi-minute stall in the window. |
 | C8 | Rhea Finance passed $16B cumulative volume and $1M revenue in 12 months (ecosystem analysis) | **Inflated** | Volume leg survives: $16.50B at Sep 2025 (103.1%). Revenue leg doesn't: protocol revenue (DefiLlama `dailyRevenue`, Oct 2024–Sep 2025) is $493,924 = 49.4% of the claim. The headline holds only if gross user fees ($2.47M) are relabelled as revenue. |
 
 ## Methodology
