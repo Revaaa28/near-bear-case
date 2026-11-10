@@ -1,0 +1,1 @@
+{"description":"The Bear Case, Run Live — an adversarial audit of NEAR-ecosystem headline claims, re-tested live against chain data (NEAR Hackathon, Investment Thesis track).","engines":{"node":">=18"},"name":"near-bear-case","private":true,"scripts":{"verify":"node scripts/verify.mjs"},"type":"module","version":"1.0.0"}

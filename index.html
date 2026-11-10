@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Bear Case, Run Live — NEAR headline claims vs the chain</title>
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#121215; --panel2:#17171b; --line:#26262c;
+    --ink:#ece9e2; --dim:#9b978c; --faint:#6d6a61;
+    --red:#ff4d42; --amber:#ffb224; --green:#3ddc84; --violet:#b18cff;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+
+  /* ---------- masthead ---------- */
+  header{border-bottom:3px double var(--line);padding:54px 0 30px;margin-bottom:8px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--red)}
+  h1{font-family:var(--serif);font-weight:900;font-size:clamp(44px,8.5vw,96px);line-height:.94;margin:14px 0 6px;letter-spacing:-.01em}
+  h1 .live{color:var(--red);font-style:italic}
+  .deck{font-family:var(--serif);font-size:clamp(17px,2.4vw,22px);color:var(--dim);max-width:760px;line-height:1.45;margin:10px 0 22px}
+  .metalist{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:14px}
+  .metalist b{color:var(--dim);font-weight:600}
+  .rerun{font-family:var(--mono);font-size:12.5px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 9px;color:var(--ink)}
+
+  /* ---------- scoreboard ---------- */
+  .score{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0 8px}
+  .score .cell{border:1px solid var(--line);background:var(--panel);padding:16px 18px 13px;border-top:4px solid var(--line)}
+  .score .n{font-family:var(--serif);font-size:44px;font-weight:900;line-height:1}
+  .score .l{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin-top:7px;color:var(--dim)}
+  .cell.survives{border-top-color:var(--green)} .cell.survives .n{color:var(--green)}
+  .cell.inflated{border-top-color:var(--amber)} .cell.inflated .n{color:var(--amber)}
+  .cell.false{border-top-color:var(--red)} .cell.false .n{color:var(--red)}
+  .cell.unverifiable{border-top-color:var(--violet)} .cell.unverifiable .n{color:var(--violet)}
+  .scorenote{font-size:13.5px;color:var(--faint);margin:6px 2px 30px;font-style:italic;font-family:var(--serif)}
+
+  /* ---------- claim cards ---------- */
+  .card{border:1px solid var(--line);background:var(--panel);margin:0 0 26px;padding:26px 28px 22px;position:relative}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--line)}
+  .card.survives::before{background:var(--green)} .card.inflated::before{background:var(--amber)}
+  .card.false::before{background:var(--red)} .card.unverifiable::before{background:var(--violet)}
+  .cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .cid{font-family:var(--mono);font-size:12px;letter-spacing:.25em;color:var(--faint)}
+  .badge{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:6px 12px;border-radius:3px;white-space:nowrap}
+  .badge.survives{background:rgba(61,220,132,.13);color:var(--green);border:1px solid rgba(61,220,132,.45)}
+  .badge.inflated{background:rgba(255,178,36,.12);color:var(--amber);border:1px solid rgba(255,178,36,.45)}
+  .badge.false{background:rgba(255,77,66,.12);color:var(--red);border:1px solid rgba(255,77,66,.5)}
+  .badge.unverifiable{background:rgba(177,140,255,.12);color:var(--violet);border:1px solid rgba(177,140,255,.45)}
+  .claim{font-family:var(--serif);font-size:clamp(22px,3.4vw,31px);font-weight:700;line-height:1.22;margin:10px 0 6px}
+  .claim::before{content:"“"} .claim::after{content:"”"}
+  .source{font-size:13.5px;color:var(--dim);margin-bottom:18px}
+  .source a{color:var(--dim);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+  .source a:hover{color:var(--ink)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 34px}
+  .col h3{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--line);padding-bottom:7px;margin:0 0 11px}
+  .col p{font-size:14.5px;line-height:1.55;color:#cfccc2;margin:0}
+  .figs{display:flex;flex-direction:column;gap:9px}
+  .fig{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:1px dashed #222228;padding-bottom:7px}
+  .fig .fl{font-size:12.5px;color:var(--dim)}
+  .fig .fv{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--ink);white-space:nowrap}
+  .verdictline{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:15px;line-height:1.6}
+  .verdictline .who{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;display:block;margin-bottom:5px}
+  .card.survives .who{color:var(--green)} .card.inflated .who{color:var(--amber)}
+  .card.false .who{color:var(--red)} .card.unverifiable .who{color:var(--violet)}
+  .raw{margin-top:14px}
+  .raw summary{font-family:var(--mono);font-size:11.5px;color:var(--faint);cursor:pointer;letter-spacing:.08em}
+  .raw summary:hover{color:var(--dim)}
+  .raw table{width:100%;border-collapse:collapse;margin-top:9px;font-family:var(--mono);font-size:12px}
+  .raw td{padding:4px 8px 4px 0;border-bottom:1px solid #1c1c21;color:var(--dim);word-break:break-all}
+  .raw td:last-child{text-align:right;color:var(--ink)}
+  .runat{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:12px}
+
+  /* ---------- footer ---------- */
+  footer{border-top:3px double var(--line);margin-top:44px;padding-top:22px;color:var(--dim);font-size:14px;line-height:1.65}
+  footer h3{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);margin:22px 0 8px}
+  footer h3:first-child{margin-top:0}
+  .scale{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 30px}
+  .scale div b{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .err{border:1px solid var(--red);color:var(--red);padding:18px;font-family:var(--mono);font-size:13.5px;line-height:1.6}
+  @media (max-width:760px){
+    .cols{grid-template-columns:1fr;gap:20px}
+    .score{grid-template-columns:repeat(2,1fr)}
+    .scale{grid-template-columns:1fr}
+    .card{padding:20px 18px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Investment Thesis · An adversarial audit</div>
+    <h1>The Bear Case,<br><span class="live">Run Live</span></h1>
+    <p class="deck">Eight bullish headline claims about the NEAR ecosystem — each one re-tested
+    against live chain data and independent aggregators, by a tool anyone can re-run.
+    Verdicts follow the data: claims that survive are reported as surviving.</p>
+    <div class="metalist" id="meta">Loading the latest verification run…</div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer id="foot"></footer>
+</div>
+
+<script src="results.js"></script>
+<script>
+const VERDICT_CLASS = { "Survives":"survives", "Inflated":"inflated", "False":"false", "Unverifiable":"unverifiable" };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtVal = (v) => {
+  if (typeof v === "number") return Math.abs(v) >= 1000 ? v.toLocaleString("en-US",{maximumFractionDigits:4}) : String(v);
+  return String(v);
+};
+
+function render(doc){
+  const when = new Date(doc.generatedAt);
+  document.getElementById("meta").innerHTML =
+    `<span>Last run <b>${esc(when.toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}))} UTC</b></span>` +
+    `<span>Mainnet height <b>${esc(doc.context.rpcBlockHeight.toLocaleString("en-US"))}</b></span>` +
+    `<span>NEAR <b>$${esc(doc.context.nearPriceUsd)}</b></span>` +
+    `<span>Reproduce it: <span class="rerun">npm run verify</span></span>`;
+
+  const t = doc.tally || {};
+  const order = ["Survives","Inflated","False","Unverifiable"];
+  const nClaims = doc.claims.length, nSurv = t["Survives"] ?? 0;
+  let html = `<section class="score">` + order.map(v =>
+    `<div class="cell ${VERDICT_CLASS[v]}"><div class="n">${t[v] ?? 0}</div><div class="l">${v}</div></div>`).join("") +
+    `</section><p class="scorenote">${nClaims} claims tested. ${nSurv} survived the bear test outright — that is what makes the ${nClaims - nSurv} that didn't worth printing.</p>`;
+
+  html += doc.claims.map(c => {
+    const cls = VERDICT_CLASS[c.verdict] || "unverifiable";
+    const figs = (c.figures||[]).map(f =>
+      `<div class="fig"><span class="fl">${esc(f.label)}</span><span class="fv">${esc(f.display)}</span></div>`).join("");
+    const rawRows = Object.entries(c.numbers||{}).map(([k,v]) =>
+      `<tr><td>${esc(k)}</td><td>${esc(fmtVal(v))}</td></tr>`).join("");
+    const missing = c.missingData ? `<div class="col"><h3>What is missing</h3><p>${esc(c.missingData)}</p></div>` : "";
+    return `<article class="card ${cls}">
+      <div class="cardhead"><span class="cid">CLAIM ${esc(c.id)} / 08</span><span class="badge ${cls}">${esc(c.verdict)}</span></div>
+      <div class="claim">${esc(c.claim)}</div>
+      <div class="source">— ${esc(c.claimant)} · <a href="${esc(c.sourceUrl)}" target="_blank" rel="noopener">source</a></div>
+      <div class="cols">
+        <div class="col"><h3>The bear test</h3><p>${esc(c.test)}</p></div>
+        <div class="col"><h3>What the data says</h3><div class="figs">${figs}</div></div>
+        ${missing}
+      </div>
+      <div class="verdictline"><span class="who">Verdict — ${esc(c.verdict)}</span>${esc(c.justification)}</div>
+      <details class="raw"><summary>RAW NUMBERS &amp; SOURCES</summary>
+        <table>${rawRows}</table>
+        <div class="runat">Fetched live at run time from: ${(c.sourcesUsed||[]).map(esc).join(" · ")}</div>
+      </details>
+      <div class="runat">Test executed ${esc(new Date(c.runAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}))} UTC</div>
+    </article>`;
+  }).join("");
+
+  document.getElementById("app").innerHTML = html;
+
+  const scale = Object.entries(doc.verdictScale||{}).map(([k,v]) =>
+    `<div><b style="color:var(--${k==='Survives'?'green':k==='Inflated'?'amber':k==='False'?'red':'violet'})">${esc(k)}</b> — ${esc(v)}</div>`).join("");
+  document.getElementById("foot").innerHTML = `
+    <h3>How to read this page</h3>
+    <div class="scale">${scale}</div>
+    <h3>Method</h3>
+    <p>Every number on this page was fetched live by <span class="rerun">npm run verify</span> from public,
+    keyless sources — NEAR mainnet RPC, the NearBlocks API and DefiLlama's public API — and every verdict is
+    derived from those numbers by thresholds written in <i>scripts/verify.mjs</i>. Nothing is hardcoded:
+    re-run the tool tomorrow and a verdict can change. One honest caveat: aggregators restate history
+    (DefiLlama revises past TVL as its adapters are corrected), so figures are the series as returned at run time,
+    date-stamped above. Where a claim cannot be tested with public data, the card says so and names exactly
+    what is missing instead of guessing.</p>
+    <h3>The point</h3>
+    <p>An investment thesis you cannot re-run is marketing. This desk's thesis is the tool itself:
+    any reader — judge, investor, or skeptic — can reproduce every verdict on this page with one command.</p>`;
+}
+
+async function boot(){
+  let doc = null;
+  try {
+    const r = await fetch("results.json", {cache:"no-store"});
+    if (r.ok) doc = await r.json();
+  } catch(e) { /* file:// or offline — fall back to results.js */ }
+  if (!doc && window.BEAR_RESULTS) doc = window.BEAR_RESULTS;
+  if (!doc) {
+    document.getElementById("app").innerHTML =
+      `<div class="err">No verification results found.<br>Run <b>npm run verify</b> in this folder first — it fetches live data and writes results.json — then reload this page.</div>`;
+    document.getElementById("meta").textContent = "";
+    return;
+  }
+  render(doc);
+}
+boot();
+</script>
+</body>
+</html>
