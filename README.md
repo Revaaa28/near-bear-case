@@ -19,7 +19,8 @@ Verdicts follow the data. Three of the eight claims survive the bear test and
 are reported as surviving — that is what makes the four that fail worth
 believing.
 
-- **Demo video (2 min):** [demo-video.mp4](demo-video.mp4) — narrated walkthrough of the dashboard + a full `npm run verify` run, subtitles synced to the voiceover
+- **Demo video (1 min):** [demo-video.mp4](demo-video.mp4) — animated explainer: the claims, the bear test, the verdicts, and the one-command re-run
+- **Walkthrough (2 min):** [demo-video-walkthrough.mp4](demo-video-walkthrough.mp4) — narrated tour of the live dashboard + a full `npm run verify` run
 - **Live dashboard:** https://revaaa28.github.io/near-bear-case/
 - **Repository:** https://github.com/Revaaa28/near-bear-case
 - **Built for:** NEAR HACKATHON — tracks: Investment Thesis (primary),
